@@ -4,6 +4,7 @@ from flask_pymongo import PyMongo
 from flask_bcrypt import Bcrypt
 from flask_jwt_simple import JWTManager, jwt_required, create_jwt, get_jwt_identity
 
+
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'login_registration'
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/login_registraion'
@@ -12,6 +13,7 @@ app.config['JWT_SECRET_KEY'] = 'super-secret'
 mongo = PyMongo(app)
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
+
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -25,7 +27,7 @@ def register():
         if registered_username == None:
             print('print part 1')
             pw_hash = bcrypt.generate_password_hash(password)
-            #pw_hash=str(pw_hash)
+            # pw_hash=str(pw_hash)
             register_db.insert_one({'username': username , 'password': pw_hash , 'mobile': mobile})
             result_msg = {'msg': 'registered succesfully'}
             return jsonify(result_msg)             
@@ -35,6 +37,8 @@ def register():
             return jsonify(result_msg)
     except Exception as e:
         print(e)
+
+
 @app.route('/login', methods=['POST'])
 def login():
     try:
@@ -49,19 +53,20 @@ def login():
         print('is it working')
         print(decrypted_password)
         if existing_user==None:
-            return jsonify({"msg":"User is not found in the system" , "user": existing_user})
+            return jsonify({"msg": "User is not found in the system", "user": existing_user})
         else:
             existing_user_name=existing_user["username"]
             existing_user_password=existing_user["password"]
-            #if username == existing_user_name and password == existing_encrypted_password:
+            # if username == existing_user_name and password == existing_encrypted_password:
             if username == existing_user_name and decrypted_password == True:
                 print(existing_user_name , existing_user_name , existing_user_password)
                 ret = {'access_token': create_jwt(username)}
                 return jsonify(ret), 200
-                  #exicuting this
             return jsonify({"msg": "Bad username or password"}), 401
     except Exception as e:
         print(e)
+
+
 @app.route('/profile', methods=['GET'])
 @jwt_required
 def profile():
@@ -69,16 +74,17 @@ def profile():
     print('welcome to profile page')
     current_user = get_jwt_identity()
     print(current_user)
-    user_data_base = our_db.find_one({'username':current_user}, {"_id": 0 , "password": 0})
+    user_data_base = our_db.find_one({'username': current_user}, {"_id": 0, "password": 0})
     print(user_data_base)
     return jsonify(user_data_base)
+
 
 @app.route('/users' , methods=['GET'])
 @jwt_required
 def users():
     our_db = mongo.db.login_registration1
     
-    user_details = our_db.find({},{'username':1 , '_id':0}).sort('username')
+    user_details = our_db.find({}, {'username': 1, '_id': 0}).sort('username')
     user_name = []
     for x in user_details:
         print('this is inside of for loop')
@@ -87,11 +93,12 @@ def users():
     print(user_name)
     return jsonify(user_name)
 
+
 @app.route('/mail_list', methods=['GET'])
 @jwt_required
 def mail_list():
     db = mongo.db.login_registration1
-    user_email_details = db.find({},{"email":1 , '_id':0}).sort('email')
+    user_email_details = db.find({}, {"email": 1, '_id': 0}).sort('email')
     user_email = []
     for y in user_email_details:
         user_email.append(y)
