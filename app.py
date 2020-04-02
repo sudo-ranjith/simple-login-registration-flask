@@ -56,6 +56,6 @@ class LoginUser(Resource):
         except Exception as e:
             return {"status": "failure", "Exception": e}
 
-
+# test commit
 if __name__ == '__main__':
     app.run(debug=True)
